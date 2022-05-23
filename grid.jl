@@ -1,4 +1,6 @@
 using Plots
+using Roots
+using LaTeXStrings
 
 iteratedhfunc(c, h) = x -> x + c*h(x)
 
@@ -32,31 +34,7 @@ function findc(h, n, a, b)
     c = (a+b)/2
     Δ = b
     f(x) = iteratef(iteratedhfunc(x, h), n) - 1
-    while Δ > 1e-10
-        Δ = b-a
-        f_a = f(a)
-        f_b = f(b)
-        c = (a+b)/2
-        f_c = f(c)
-        # println("")
-        # println("$a $c $b")
-        # println("$f_a $f_c $f_b")
-        if f_a*f_c <= 0 
-            b = c
-            continue
-        elseif f_b*f_c <= 0
-            a = c
-            continue
-        # else
-        #     if rand([true, false])
-        #         a = c
-        #     else
-        #         b = c
-        #     end
-        #     continue
-        end
-    end
-    println("$n: $c")
+    c = find_zero(f, (a,b))
     return c
 end
 
@@ -80,7 +58,7 @@ end
 
 function plotgrids(h, n)
     cs = findcarray(h, n)
-    plt = plot()
+    plt = plot(xlabel = L"x_n:\ x_{n+1} = x_{n} + c\cdot h(x_n),\ n = 1...N,\ c > 0", ylabel = L"N")
     for i = 1:n
         scatter!(plt, gridarray(h, cs[i], i), fill(i+1,i), label = false, mc = "black")
     end
@@ -90,9 +68,9 @@ end
 function plotsolutions(h, n)
     plt = plotgrids(h, n)
     x = [0:0.001:1;]
-    plt_h = plot(x, h.(x), label = "step function")
+    plt_h = plot(x, h.(x), ylabel = L"h(x)", xlabel = L"x", label = false)
     plot(plt_h, plt, layout = @layout([A; B]))
 end
 
-h = x -> cos(20x)+2.01
+h = x -> cos(40x)+2.01
 plotsolutions(h, 40)
